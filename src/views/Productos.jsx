@@ -105,9 +105,9 @@ const Productos = () => {
       return;
     }
     try {
-      await addDoc(productosCollection, nuevoProducto);
       setShowModal(false);
       setNuevoProducto({ nombre: "", precio: "", categoria: "", imagen: "" });
+      await addDoc(productosCollection, nuevoProducto);
       await fetchData();
     } catch (error) {
       console.error("Error al agregar producto:", error);
