@@ -1,4 +1,3 @@
-// Importaciones
 import React, { useState, useEffect } from "react";
 import { Container, Button } from "react-bootstrap";
 import { db } from "../database/firebaseconfig";
@@ -72,7 +71,7 @@ const Categorias = () => {
     }));
   };
 
-  // Función para agregar una nueva categoría (CREATE)
+  // Funcion para agregar una nueva categoría 
   const handleAddCategoria = async () => {
     if (!nuevaCategoria.nombre || !nuevaCategoria.descripcion) {
       alert("Por favor, completa todos los campos antes de guardar.");
@@ -80,6 +79,7 @@ const Categorias = () => {
     }
     try {
       await addDoc(categoriasCollection, nuevaCategoria);
+      alert("Categoría agregada correctamente.");
       setShowModal(false);
       setNuevaCategoria({ nombre: "", descripcion: "" });
       await fetchCategorias();
@@ -88,7 +88,7 @@ const Categorias = () => {
     }
   };
 
-  // Función para actualizar una categoría existente (UPDATE)
+  // Función para actualizar una categoría existente
   const handleEditCategoria = async () => {
     if (!categoriaEditada.nombre || !categoriaEditada.descripcion) {
       alert("Por favor, completa todos los campos antes de actualizar.");
@@ -96,7 +96,11 @@ const Categorias = () => {
     }
     try {
       const categoriaRef = doc(db, "categorias", categoriaEditada.id);
-      await updateDoc(categoriaRef, categoriaEditada);
+      await updateDoc(categoriaRef, {
+        nombre: categoriaEditada.nombre,
+        descripcion: categoriaEditada.descripcion
+      });
+      alert("Categoría actualizada correctamente.");
       setShowEditModal(false);
       await fetchCategorias();
     } catch (error) {
@@ -110,10 +114,12 @@ const Categorias = () => {
       try {
         const categoriaRef = doc(db, "categorias", categoriaAEliminar.id);
         await deleteDoc(categoriaRef);
+        alert("Categoría eliminada correctamente.");
         setShowDeleteModal(false);
         await fetchCategorias();
       } catch (error) {
         console.error("Error al eliminar la categoría:", error);
+        alert("Error al eliminar la categoría.");
       }
     }
   };

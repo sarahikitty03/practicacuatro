@@ -1,7 +1,6 @@
-// Importaciones
 import React, { useState, useEffect } from "react";
 import { Container, Button } from "react-bootstrap";
-import { db } from "../database/firebaseconfig";
+import { db } from "../../database/firebaseconfig";
 import {
   collection,
   getDocs,
@@ -10,10 +9,10 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
-import TablaProductos from "../components/productos/Tablaproductos";
-import ModalRegistroProducto from "../components/productos/ModalRegistroProducto";
-import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
-import ModalEliminacionProducto from "../components/productos/ModalEliminacionProducto";
+import TablaProductos from "../productos/Tablaproductos";
+import ModalRegistroProducto from "../productos/ModalRegistroProducto"
+import ModalEdicionProducto from "../productos/ModalEdicionProducto";
+import ModalEliminacionProducto from "../productos/ModalEliminacionProducto";
 
 const Productos = () => {
   // Estados para manejo de datos
@@ -98,60 +97,45 @@ const Productos = () => {
     }
   };
 
-  // Funcion para agregar un nuevo producto
+  // Función para agregar un nuevo producto (CREATE)
   const handleAddProducto = async () => {
     if (!nuevoProducto.nombre || !nuevoProducto.precio || !nuevoProducto.categoria) {
       alert("Por favor, completa todos los campos requeridos.");
       return;
     }
-  
-    const productoConPrecioNumerico = {
-      ...nuevoProducto,
-      precio: parseFloat(nuevoProducto.precio),
-    };
-  
     try {
-      await addDoc(productosCollection, productoConPrecioNumerico);
-      alert("Producto agregado correctamente.");
+      await addDoc(productosCollection, nuevoProducto);
       setShowModal(false);
       setNuevoProducto({ nombre: "", precio: "", categoria: "", imagen: "" });
       await fetchData();
     } catch (error) {
       console.error("Error al agregar producto:", error);
-      alert("Error al agregar el producto.");
     }
   };
 
-
-  // Funcion para actualizar un producto existente
+  // Función para actualizar un producto existente (UPDATE)
   const handleEditProducto = async () => {
-    console.log("Producto a editar:", productoEditado);
-    console.log("ID del producto a editar:", productoEditado.id); 
-    
-    if (!productoEditado || !productoEditado.id) {
-      alert("No se puede editar el producto. Faltan datos.");
-      return;
-    }
-  
     try {
       const productoRef = doc(db, "productos", productoEditado.id);
       await updateDoc(productoRef, {
         nombre: productoEditado.nombre,
         precio: productoEditado.precio,
         categoria: productoEditado.categoria,
-        imagen: productoEditado.imagen,
+        imagen: productoEditado.imagen, // Asegúrate de manejar la imagen correctamente
       });
   
       alert("Producto actualizado correctamente");
-      setShowEditModal(false); 
-      fetchData();
+  
+      setShowEditModal(false); // Cierra el modal
+  
+      fetchData(); // ✅ Recargar los datos en el catálogo automáticamente
     } catch (error) {
       console.error("Error al actualizar el producto:", error);
       alert("Error al actualizar el producto");
     }
-  };
+  }
 
-  // Funcion para eliminar un producto
+  // Función para eliminar un producto (DELETE)
   const handleDeleteProducto = async () => {
     if (productoAEliminar) {
       try {
@@ -165,7 +149,7 @@ const Productos = () => {
     }
   };
 
-  // Función para abrir el modal de edicion con datos prellenados
+  // Función para abrir el modal de edición con datos prellenados
   const openEditModal = (producto) => {
     setProductoEditado({ ...producto });
     setShowEditModal(true);

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Form, Col, Button } from "react-bootstrap";
-import { db } from "../database/firebaseconfig";
+import { db } from "../../database/firebaseconfig";
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
-import TarjetaProducto from "../components/catalogo/TarjetaProducto";
-import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
+import TarjetaProducto from "../catalogo/TarjetaProducto";
+import ModalEdicionProducto from "../productos/ModalEdicionProducto";
 
 const Catalogo = () => {
   const [productos, setProductos] = useState([]);
@@ -110,6 +110,10 @@ const Catalogo = () => {
               ))}
             </Form.Select>
           </Form.Group>
+          {/* Botón de actualización */}
+          <Button variant="primary" onClick={fetchData}>
+            Actualizar
+          </Button>
         </Col>
       </Row>
       {/* Catálogo de productos filtrados */}
