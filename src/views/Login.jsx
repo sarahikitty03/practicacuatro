@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container } from "react-bootstrap";
 import LoginForm from "../components/LoginForm";
@@ -16,6 +16,12 @@ const Login = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (user) {
+      navigate("/inicio");
+    }
+  }, [user, navigate]); // ahora se va a ejecutar antes del render, porque me salia un error en la consola del navegador que utilizo.
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const auth = getAuth(appfirebase);
@@ -23,10 +29,8 @@ const Login = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         console.log("Usuario autenticado:", userCredential.user);
-        // Guardar las credenciales en localStorage
         localStorage.setItem("adminEmail", email);
         localStorage.setItem("adminPassword", password);
-        // Redirigir después de iniciar sesión
         navigate("/inicio");
       })
       .catch((error) => {
@@ -34,11 +38,6 @@ const Login = () => {
         console.error(error);
       });
   };
-
-  // Si el usuario ya está autenticado, redirigir automáticamente
-  if (user) {
-    navigate("/inicio");
-  }
 
   return (
     <Container className="d-flex vh-100 justify-content-center align-items-center">

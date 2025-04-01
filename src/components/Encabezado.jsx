@@ -95,6 +95,13 @@ const Encabezado = () => {
               >                 
                 <strong>Productos</strong>               
               </Nav.Link> 
+
+              <Nav.Link                 
+                onClick={() => handleNavigate("/libros")}                 
+                className={isCollapsed ? "color-texto-marca" : "text-white"}               
+              >                 
+                <strong>Libros</strong>               
+              </Nav.Link> 
               
               {isLoggedIn ? (
                 <>
