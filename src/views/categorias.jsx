@@ -16,6 +16,7 @@ import ModalRegistroCategoria from "../components/categorias/modalregistrocatego
 import ModalEdicionCategoria from "../components/categorias/modaledicioncategoria";
 import ModalEliminacionCategoria from "../components/categorias/modaleliminacioncategoria";
 import CuadroBusqueda from "../components/Busqueda/CuadroBusqueda";
+import Paginacion from "../components/ordenamiento/Paginacion";
 
 
 const Categorias = () => {
@@ -33,6 +34,8 @@ const Categorias = () => {
   const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
   const [categoriaFiltradas, setCategoriasFiltradas] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Número de productos por página
 
   // Referencia a la colección de categorías en Firestore
   const categoriasCollection = collection(db, "categorias");
@@ -68,6 +71,12 @@ const Categorias = () => {
     );
     setCategoriasFiltradas(filtradas);
   }
+
+    // Calcular productos paginados
+    const paginatedCategorias = categoriaFiltradas.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
 
 
   // Manejador de cambios en inputs del formulario de nueva categoría
@@ -158,15 +167,25 @@ const Categorias = () => {
     <Container className="mt-5">
       <br />
       <h4>Gestión de Categorías</h4>
-      <CuadroBusqueda searchText={searchText} handleSearchChange={handleSearchChange} />
-      <Button className="mb-3" onClick={() => setShowModal(true)}>
-        Agregar categoría
-      </Button>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <Button onClick={() => setShowModal(true)}>
+          Agregar categoría
+        </Button>
+        <CuadroBusqueda searchText={searchText} handleSearchChange={handleSearchChange} />
+      </div>
+      <>
       <TablaCategorias
-        categorias={categoriaFiltradas}
+        categorias={paginatedCategorias}
         openEditModal={openEditModal}
         openDeleteModal={openDeleteModal}
       />
+      <Paginacion
+          itemsPerPage={itemsPerPage}
+          totalItems={categoriaFiltradas.length}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          />
+      </>
       <ModalRegistroCategoria
         showModal={showModal}
         setShowModal={setShowModal}

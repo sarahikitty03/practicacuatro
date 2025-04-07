@@ -17,6 +17,7 @@ import ModalEdicionLibro from "../components/libros/ModalEdicionLibro";
 import ModalEliminacionLibro from "../components/libros/ModalEliminacionLibro";
 import { useAuth } from "../database/authcontext";
 import CuadroBusqueda from "../components/Busqueda/CuadroBusqueda";
+import Paginacion from "../components/ordenamiento/Paginacion";
 
 const Libros = () => {
   const [libros, setLibros] = useState([]);
@@ -33,8 +34,10 @@ const Libros = () => {
   const [libroAEliminar, setLibroAEliminar] = useState(null);
   const [pdfFile, setPdfFile] = useState(null);
   const [error, setError] = useState(null);
-  const [LibrosFiltrados, setLibrosFiltrados] = useState(null);
+  const [librosFiltrados, setLibrosFiltrados] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Número de productos por página
 
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
@@ -77,6 +80,12 @@ const Libros = () => {
     );
     setLibrosFiltrados(filtradas);
   }
+
+    // Calcular productos paginados
+    const paginatedLibros = librosFiltrados.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -209,16 +218,31 @@ const Libros = () => {
     <Container className="mt-5">
       <br />
       <h4>Gestión de Libros</h4>
-      <CuadroBusqueda searchText={searchText} handleSearchChange={handleSearchChange} />
+
+      {/* Agrupamos el botón y el cuadro de búsqueda en un contenedor con flexbox */}
+      <div className="d-flex align-items-center justify-content-between mb-3">
+        <Button onClick={() => setShowModal(true)}>Agregar libro</Button>
+        <div style={{ width: "300px" }}>
+          <CuadroBusqueda searchText={searchText} handleSearchChange={handleSearchChange} />
+        </div>
+      </div>
+
       {error && <Alert variant="danger">{error}</Alert>}
-      <Button className="mb-3" onClick={() => setShowModal(true)}>
-        Agregar libro
-      </Button>
+
       <TablaLibros
-        libros={LibrosFiltrados}
+        libros={paginatedLibros}
         openEditModal={openEditModal}
         openDeleteModal={openDeleteModal}
       />
+
+      <Paginacion
+        itemsPerPage={itemsPerPage}
+        totalItems={librosFiltrados.length}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+      />
+
+      {/* Modales */}
       <ModalRegistroLibro
         showModal={showModal}
         setShowModal={setShowModal}
@@ -241,6 +265,7 @@ const Libros = () => {
         handleDeleteLibro={handleDeleteLibro}
       />
     </Container>
+
   );
 };
 

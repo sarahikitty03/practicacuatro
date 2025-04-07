@@ -1,4 +1,3 @@
-// Importaciones
 import React, { useState, useEffect } from "react";
 import { Container, Button } from "react-bootstrap";
 import { db } from "../database/firebaseconfig";
@@ -15,6 +14,7 @@ import ModalRegistroProducto from "../components/productos/ModalRegistroProducto
 import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
 import ModalEliminacionProducto from "../components/productos/ModalEliminacionProducto";
 import CuadroBusqueda from "../components/Busqueda/CuadroBusqueda";
+import Paginacion from "../components/ordenamiento/Paginacion";
 
 const Productos = () => {
   // Estados para manejo de datos
@@ -33,6 +33,8 @@ const Productos = () => {
   const [productoAEliminar, setProductoAEliminar] = useState(null);
   const [productosFiltrados, setProductosFiltrados] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Número de productos por página
 
   // Referencia a las colecciones en Firestore
   const productosCollection = collection(db, "productos");
@@ -79,6 +81,12 @@ const Productos = () => {
     );
     setProductosFiltrados(filtradas);
   }
+
+  // Calcular productos paginados
+  const paginatedProductos = productosFiltrados.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Manejador de cambios en inputs del formulario de nuevo producto
   const handleInputChange = (e) => {
@@ -199,15 +207,27 @@ const Productos = () => {
     <Container className="mt-5">
       <br />
       <h4>Gestión de Productos</h4>
-      <CuadroBusqueda searchText={searchText} handleSearchChange={handleSearchChange} />
-      <Button className="mb-3" onClick={() => setShowModal(true)}>
-        Agregar producto
-      </Button>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <Button onClick={() => setShowModal(true)}>
+            Agregar producto
+          </Button>
+          <CuadroBusqueda searchText={searchText} handleSearchChange={handleSearchChange} />
+        </div>
+
+      <>
       <TablaProductos
-        productos={productosFiltrados}
+        productos={paginatedProductos} // productos paginados
         openEditModal={openEditModal}
         openDeleteModal={openDeleteModal}
       />
+
+      <Paginacion
+        itemsPerPage={itemsPerPage}
+        totalItems={productosFiltrados.length}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+      />
+    </>
       <ModalRegistroProducto
         showModal={showModal}
         setShowModal={setShowModal}
