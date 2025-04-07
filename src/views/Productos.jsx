@@ -14,6 +14,7 @@ import TablaProductos from "../components/productos/Tablaproductos";
 import ModalRegistroProducto from "../components/productos/ModalRegistroProducto";
 import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
 import ModalEliminacionProducto from "../components/productos/ModalEliminacionProducto";
+import CuadroBusqueda from "../components/Busqueda/CuadroBusqueda";
 
 const Productos = () => {
   // Estados para manejo de datos
@@ -30,6 +31,8 @@ const Productos = () => {
   });
   const [productoEditado, setProductoEditado] = useState(null);
   const [productoAEliminar, setProductoAEliminar] = useState(null);
+  const [productosFiltrados, setProductosFiltrados] = useState([]);
+  const [searchText, setSearchText] = useState("");
 
   // Referencia a las colecciones en Firestore
   const productosCollection = collection(db, "productos");
@@ -45,6 +48,7 @@ const Productos = () => {
         id: doc.id,
       }));
       setProductos(fetchedProductos);
+      setProductosFiltrados(fetchedProductos);
 
       // Obtener categorías
       const categoriasData = await getDocs(categoriasCollection);
@@ -62,6 +66,19 @@ const Productos = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleSearchChange = (e) => {
+    console.log(e);
+    const text = e.target.value.toLowerCase();
+    setSearchText(text);
+
+    const filtradas = productos.filter((producto) =>
+      producto.nombre.toLowerCase().includes(text) ||
+      producto.precio.toString().toLowerCase().includes(text) ||
+      producto.categoria.toLowerCase().includes(text) 
+    );
+    setProductosFiltrados(filtradas);
+  }
 
   // Manejador de cambios en inputs del formulario de nuevo producto
   const handleInputChange = (e) => {
@@ -182,11 +199,12 @@ const Productos = () => {
     <Container className="mt-5">
       <br />
       <h4>Gestión de Productos</h4>
+      <CuadroBusqueda searchText={searchText} handleSearchChange={handleSearchChange} />
       <Button className="mb-3" onClick={() => setShowModal(true)}>
         Agregar producto
       </Button>
       <TablaProductos
-        productos={productos}
+        productos={productosFiltrados}
         openEditModal={openEditModal}
         openDeleteModal={openDeleteModal}
       />

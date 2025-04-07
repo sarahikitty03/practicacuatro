@@ -15,7 +15,7 @@ const TablaLibros = ({ libros, openEditModal, openDeleteModal }) => {
         </tr>
       </thead>
       <tbody>
-        {libros.map((libro) => (
+        {libros?.map((libro) => (
           <tr key={libro.id}>
             <td>{libro.nombre}</td>
             <td>{libro.autor}</td>

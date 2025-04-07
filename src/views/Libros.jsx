@@ -16,6 +16,7 @@ import ModalRegistroLibro from "../components/libros/ModalRegistroLibro";
 import ModalEdicionLibro from "../components/libros/ModalEdicionLibro";
 import ModalEliminacionLibro from "../components/libros/ModalEliminacionLibro";
 import { useAuth } from "../database/authcontext";
+import CuadroBusqueda from "../components/Busqueda/CuadroBusqueda";
 
 const Libros = () => {
   const [libros, setLibros] = useState([]);
@@ -32,6 +33,8 @@ const Libros = () => {
   const [libroAEliminar, setLibroAEliminar] = useState(null);
   const [pdfFile, setPdfFile] = useState(null);
   const [error, setError] = useState(null);
+  const [LibrosFiltrados, setLibrosFiltrados] = useState(null);
+  const [searchText, setSearchText] = useState("");
 
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
@@ -46,6 +49,7 @@ const Libros = () => {
         id: doc.id,
       }));
       setLibros(fetchedLibros);
+      setLibrosFiltrados(fetchedLibros);
     } catch (error) {
       console.error("Error al obtener datos:", error);
       setError("Error al cargar los datos. Intenta de nuevo.");
@@ -59,6 +63,20 @@ const Libros = () => {
       fetchData();
     }
   }, [isLoggedIn, navigate]);
+
+  const handleSearchChange = (e) => {
+    console.log(e);
+    const text = e.target.value.toLowerCase();
+    setSearchText(text);
+
+    const filtradas = libros.filter((libro) =>
+      libro.nombre.toLowerCase().includes(text) ||
+      libro.autor.toLowerCase().includes(text) ||
+      libro.genero.toLowerCase().includes(text) ||
+      libro.pdfUrl.toLowerCase().includes(text)
+    );
+    setLibrosFiltrados(filtradas);
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -191,12 +209,13 @@ const Libros = () => {
     <Container className="mt-5">
       <br />
       <h4>Gestión de Libros</h4>
+      <CuadroBusqueda searchText={searchText} handleSearchChange={handleSearchChange} />
       {error && <Alert variant="danger">{error}</Alert>}
       <Button className="mb-3" onClick={() => setShowModal(true)}>
         Agregar libro
       </Button>
       <TablaLibros
-        libros={libros}
+        libros={LibrosFiltrados}
         openEditModal={openEditModal}
         openDeleteModal={openDeleteModal}
       />
