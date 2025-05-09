@@ -4,7 +4,7 @@ import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Offcanvas from "react-bootstrap/Offcanvas";
-import logo from "../assets/market.png";
+import logo from "../assets/ferreteria_selva_logo.png";
 import { useAuth } from "../database/authcontext";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import "../App.css";
@@ -46,7 +46,7 @@ const Encabezado = () => {
       <Container>
         <Navbar.Brand onClick={() => handleNavigate("/inicio")} className="text-white" style={{ cursor: "pointer" }}>
           <img alt="" src={logo} width="30" height="30" className="d-inline-block align-top" />{" "}
-          <strong>Bazar</strong>
+          <strong>Ferreteria Selva</strong>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="offcanvasNavbar-expand-sm" onClick={handleToggle} />
         <Navbar.Offcanvas
@@ -109,6 +109,15 @@ const Encabezado = () => {
               >
                 {isCollapsed ? <i className="bi-cloud-sun-fill me-2"></i> : null}
                 <strong>Clima</strong>
+
+              </Nav.Link>
+
+              <Nav.Link
+                onClick={() => handleNavigate("/pronunciacion")}
+                className={isCollapsed ? "color-texto-marca" : "text-white"}
+              >
+                {isCollapsed ? <i className="bi-cloud-sun-fill me-2"></i> : null}
+                <strong>Pronunciacion</strong>
 
               </Nav.Link>
               
