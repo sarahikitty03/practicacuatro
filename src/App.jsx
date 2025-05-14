@@ -13,6 +13,7 @@ import Pronunciacion from "./views/Pronunciacion";
 
 
 import './App.css'
+import Estadisticas from "./views/Estadistica";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
               <Route path="/libros" element={<ProtectedRoute element={<Libros />} />}/>
               <Route path="/clima" element={<ProtectedRoute element={<Clima />} />}/>
               <Route path="/pronunciacion" element={<ProtectedRoute element={<Pronunciacion />} />}/>
+              <Route path="/estadisticas" element={<ProtectedRoute element={<Estadisticas />} />}/>
             </Routes>
           </main>
       </Router>
