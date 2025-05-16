@@ -18,6 +18,7 @@ import ModalEliminacionLibro from "../components/libros/ModalEliminacionLibro";
 import { useAuth } from "../database/authcontext";
 import CuadroBusqueda from "../components/Busqueda/CuadroBusqueda";
 import Paginacion from "../components/ordenamiento/Paginacion";
+import ModalQR from "../components/qr/ModalQR";
 
 const Libros = () => {
   const [libros, setLibros] = useState([]);
@@ -38,6 +39,8 @@ const Libros = () => {
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Número de productos por página
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [selectedUrl, setSelectedUrl] = useState("");
 
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
@@ -214,6 +217,16 @@ const Libros = () => {
     setShowDeleteModal(true);
   };
 
+  const openQRModal = (url) => {
+    setSelectedUrl(url);
+    setShowQRModal(true);
+  };
+
+  const handleCloseQRModal = () => {
+    setShowQRModal(false);
+    setSelectedUrl("");
+  };
+
   return (
     <Container className="mt-5">
       <br />
@@ -233,6 +246,7 @@ const Libros = () => {
         libros={paginatedLibros}
         openEditModal={openEditModal}
         openDeleteModal={openDeleteModal}
+        openQRModal={openQRModal}
       />
 
       <Paginacion
@@ -240,6 +254,12 @@ const Libros = () => {
         totalItems={librosFiltrados.length}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
+      />
+
+      <ModalQR
+        show={showQRModal}
+        handleClose={handleCloseQRModal}
+        qrUrl={selectedUrl}
       />
 
       {/* Modales */}

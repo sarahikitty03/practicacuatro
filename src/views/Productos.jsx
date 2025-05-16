@@ -269,6 +269,19 @@ const Productos = () => {
     }
   };
 
+  const handleCopy = (producto) => {
+    const rowData = `Nombre: ${producto.nombre}\nPrecio: C$${producto.precio}\nCategoría: ${producto.categoria}`;
+
+    navigator.clipboard
+    .writeText(rowData)
+    .then(() => {
+      console.log("Datos de la fila copiados al portapapeles:\n" + rowData);
+    })
+    .catch((err) => {
+      console.error("Error al copiar al portapapeles", err);
+    });
+  };
+
   const openEditModal = (producto) => {
     setProductoEditado({ ...producto });
     setShowEditModal(true);
@@ -300,6 +313,7 @@ const Productos = () => {
         productos={paginatedProductos}
         openEditModal={openEditModal}
         openDeleteModal={openDeleteModal}
+        handleCopy={handleCopy}
       />
 
       <Paginacion
