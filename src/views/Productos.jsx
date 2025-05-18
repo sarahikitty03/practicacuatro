@@ -278,7 +278,7 @@ const Productos = () => {
       console.log("Datos de la fila copiados al portapapeles:\n" + rowData);
     })
     .catch((err) => {
-      console.error("Error al copiar al portapapeles", err);
+      console.error("Error al copiar al portapapeles", err); 
     });
   };
 
