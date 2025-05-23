@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Button } from "react-bootstrap";
+import { Container, Button, Col } from "react-bootstrap";
 import { db } from "../database/firebaseconfig";
 import {
   collection,
@@ -16,12 +16,14 @@ import ModalEdicionCategoria from "../components/categorias/modaledicioncategori
 import ModalEliminacionCategoria from "../components/categorias/modaleliminacioncategoria";
 import CuadroBusqueda from "../components/Busqueda/CuadroBusqueda";
 import Paginacion from "../components/ordenamiento/Paginacion";
+import ChatIA from "../components/chat/ChatIA";
 
 const Categorias = () => {
   const [categorias, setCategorias] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
   const [nuevaCategoria, setNuevaCategoria] = useState({
     nombre: "",
     descripcion: "",
@@ -115,7 +117,6 @@ const Categorias = () => {
     const tempId = `temp_${Date.now()}`;
     const categoriaConId = { ...nuevaCategoria, id: tempId };
 
-    // Si estamos offline, almacenamos los cambios localmente
     if (isOffline) {
       setOfflineChanges((prev) => ({
         ...prev,
@@ -125,7 +126,6 @@ const Categorias = () => {
     }
 
     try {
-      // Actualiza el estado local inmediatamente
       setCategorias((prev) => [...prev, categoriaConId]);
       setCategoriasFiltradas((prev) => [...prev, categoriaConId]);
       setNuevaCategoria({ nombre: "", descripcion: "" });
@@ -149,7 +149,6 @@ const Categorias = () => {
       return;
     }
 
-    // Si estamos offline, almacenamos los cambios localmente
     if (isOffline) {
       setOfflineChanges((prev) => ({
         ...prev,
@@ -170,7 +169,6 @@ const Categorias = () => {
         });
       }
 
-      // Reflejar en el estado local
       setCategorias((prev) =>
         prev.map((cat) =>
           cat.id === categoriaEditada.id ? categoriaEditada : cat
@@ -204,8 +202,12 @@ const Categorias = () => {
         alert("Estás offline. El cambio se guardará cuando te conectes.");
       }
 
-      setCategorias((prev) => prev.filter((cat) => cat.id !== categoriaAEliminar.id));
-      setCategoriasFiltradas((prev) => prev.filter((cat) => cat.id !== categoriaAEliminar.id));
+      setCategorias((prev) =>
+        prev.filter((cat) => cat.id !== categoriaAEliminar.id)
+      );
+      setCategoriasFiltradas((prev) =>
+        prev.filter((cat) => cat.id !== categoriaAEliminar.id)
+      );
 
       const categoriaRef = doc(db, "categorias", categoriaAEliminar.id);
       if (!isOffline) {
@@ -238,10 +240,20 @@ const Categorias = () => {
       )}
 
       <h4>Gestión de Categorías</h4>
-      <div className="d-flex justify-content-between align-items-center mb-3">
+      <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <Button onClick={() => setShowModal(true)}>
           Agregar categoría
         </Button>
+        <Col lg={3} md={4} sm={4} xs={12}>
+          <Button
+            className="mb-2"
+            variant="info"
+            style={{ width: "100%" }}
+            onClick={() => setShowChatModal(true)}
+          >
+            Chat IA
+          </Button>
+        </Col>
         <CuadroBusqueda
           searchText={searchText}
           handleSearchChange={handleSearchChange}
@@ -278,6 +290,12 @@ const Categorias = () => {
         showDeleteModal={showDeleteModal}
         setShowDeleteModal={setShowDeleteModal}
         handleDeleteCategoria={handleDeleteCategoria}
+      />
+
+      {/* Modal para Chat IA */}
+      <ChatIA
+        show={showChatModal}
+        onHide={() => setShowChatModal(false)}
       />
     </Container>
   );
