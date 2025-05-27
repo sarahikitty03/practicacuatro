@@ -294,7 +294,7 @@ const Categorias = () => {
 
       {/* Modal para Chat IA */}
       <ChatIA
-        show={showChatModal}
+        showChatModal={showChatModal}
         onHide={() => setShowChatModal(false)}
       />
     </Container>
