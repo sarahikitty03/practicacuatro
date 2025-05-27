@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Button } from "react-bootstrap";
+import { Container, Button, Col, Row } from "react-bootstrap";
 import { db } from "../database/firebaseconfig";
 import {
   collection,
@@ -16,6 +16,10 @@ import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
 import ModalEliminacionProducto from "../components/productos/ModalEliminacionProducto";
 import CuadroBusqueda from "../components/Busqueda/CuadroBusqueda";
 import Paginacion from "../components/ordenamiento/Paginacion";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const Productos = () => {
   // 🔌 Estado para detectar conexión
@@ -292,6 +296,124 @@ const Productos = () => {
     setShowDeleteModal(true);
   };
 
+  const generarPDFProductos = () => {
+    const doc = new jsPDF();
+
+    doc.setFillColor(28, 41, 51);
+    doc.rect(0, 0, 220, 30, 'F'); // Rectangle for header
+    doc.setTextColor(255, 255, 255); // White text
+    doc.setFontSize(28);
+    doc.text('Lista de Productos', 105, 20, { align: 'center' });
+
+    const columnas = ["#", "Nombre", "Precio", "Categoria"];
+    const filas = productosFiltrados.map((producto, index) => [
+      index + 1,
+      producto.nombre,
+      `C$ ${producto.precio}`,
+      producto.categoria,
+    ]);
+
+    const totalPaginas = "{total_pages_count_string}";
+    autoTable(doc, {
+      head: [columnas],
+      body: filas,
+      startY: 40,
+      theme: "striped",
+      styles: { fontSize: 10,cellPadding: 2 },
+      margin: { top: 20, left: 14, right: 14 },
+      tableWidth: "auto",
+      columnStyles: {
+        0: { cellWidth: 'auto' },
+        1: { cellWidth: 'auto' },
+        2: { cellWidth: 'auto' },
+      },
+      pageBreak: "auto",
+      rowPageBreak: "auto",
+
+      didDrawPage: function (data) {
+        
+        const alturaPagina = doc.internal.pageSize.getHeight();
+        const anchoPagina = doc.internal.pageSize.getWidth();
+
+        const numeroPagina = doc.internal.getNumberOfPages();
+
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        const piePagina = `Página ${numeroPagina} de ${totalPaginas}`;
+        doc.text(piePagina, anchoPagina / 2 + 15, alturaPagina - 10, {align: "center" });
+      }
+    });
+    if (typeof doc.putTotalPages === 'function') {
+      doc.putTotalPages(totalPaginas);
+    }
+
+    const fecha = new Date();
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2,'0');
+    const anio = fecha.getFullYear();
+    const nombreArchivo = `productos_${dia}${mes}${anio}.pdf`;
+
+    doc.save(nombreArchivo);
+
+  };
+
+  const generarPDFDetalleProducto = (producto) => {
+  const pdf = new jsPDF();
+
+  pdf.setFillColor(28, 41, 51);
+  pdf.rect(0, 0, 220, 30, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(22);
+  pdf.text(producto.nombre, pdf.internal.pageSize.getWidth() / 2, 18, { align: "center" });
+
+  if (producto.imagen) {
+    const propiedadesImagen = pdf.getImageProperties(producto.imagen);
+    const anchoPagina = pdf.internal.pageSize.getWidth();
+    const anchoImagen = 60;
+    const altoImagen = (propiedadesImagen.height * anchoImagen) / propiedadesImagen.width;
+    const posicionX = (anchoPagina - anchoImagen) / 2;
+    pdf.addImage(producto.imagen, 'JPEG', posicionX, 40, anchoImagen, altoImagen);
+    
+    const posicionY = 40 + altoImagen + 10;
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(14);
+    pdf.text(`Precio: C$ ${producto.precio}`, anchoPagina / 2, posicionY, { align: "center" });
+    pdf.text(`Categoría: ${producto.categoria}`, anchoPagina / 2, posicionY + 10, {align: "center"});
+  } else {
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(14);
+    pdf.text(`Precio: C$ ${producto.precio}`, pdf.internal.pageSize.getWidth() / 2, 50, { align: "center" });
+    pdf.text(`Categoría: ${producto.categoria}`, pdf.internal.pageSize.getWidth() / 2, 60, {align: "center"});
+  }
+
+  pdf.save(`${producto.nombre}.pdf`);
+  };
+
+  const exportarExcelProductos = () => {
+    const datos = productosFiltrados.map((producto, index) => ({
+      "#": index + 1,
+      Nombre: producto.nombre,
+      Precio: parseFloat(producto.precio),
+      Categoría: producto.categoria,
+    }));
+
+    const hoja = XLSX.utils.json_to_sheet(datos);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, 'Productos');
+
+    const excelBuffer = XLSX.write(libro, { bookType: 'xlsx', type: 'array' });
+
+    const fecha = new Date();
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+
+    const nombreArchivo = `Productos_${dia}${mes}${anio}.xlsx`;
+  
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(blob, nombreArchivo);
+  }
+
   return (
     <Container className="mt-5">
       <br />
@@ -303,17 +425,47 @@ const Productos = () => {
           ⚠ Estás sin conexión. Los cambios se guardarán localmente y se sincronizarán al reconectar.
         </div>
       )}
+      <Row className="align-items-center flex-wrap mb-4">
+        <Col xs={12} md="auto" className="mb-2 me-md-2">
+          <Button onClick={() => setShowModal(true)} className="w-100 w-md-auto px-4">
+            Agregar producto
+          </Button>
+        </Col>
 
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <Button onClick={() => setShowModal(true)}>Agregar producto</Button>
-        <CuadroBusqueda searchText={searchText} handleSearchChange={handleSearchChange} />
-      </div>
+        <Col xs={12} md="auto" className="mb-2 me-md-2">
+          <Button
+            onClick={generarPDFProductos}
+            variant="secondary"
+            className="w-100 w-md-auto px-4"
+          >
+            Generar PDF
+          </Button>
+        </Col>
+
+        <Col xs={12} md="auto" className="mb-2 me-md-2">
+          <Button
+            onClick={exportarExcelProductos}
+            variant="secondary"
+            className="w-100 w-md-auto px-4"
+          >
+            Generar Excel
+          </Button>
+        </Col>
+
+        <Col xs={12} md className="mb-2">
+          <CuadroBusqueda
+            searchText={searchText}
+            handleSearchChange={handleSearchChange}
+          />
+        </Col>
+      </Row>
 
       <TablaProductos
         productos={paginatedProductos}
         openEditModal={openEditModal}
         openDeleteModal={openDeleteModal}
         handleCopy={handleCopy}
+        generarPDFDetalleProducto={generarPDFDetalleProducto}
       />
 
       <Paginacion
