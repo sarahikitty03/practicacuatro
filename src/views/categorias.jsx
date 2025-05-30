@@ -18,7 +18,11 @@ import CuadroBusqueda from "../components/Busqueda/CuadroBusqueda";
 import Paginacion from "../components/ordenamiento/Paginacion";
 import ChatIA from "../components/chat/ChatIA";
 
+import { useTranslation } from "react-i18next";
+
 const Categorias = () => {
+  const { t } = useTranslation();
+
   const [categorias, setCategorias] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -69,7 +73,7 @@ const Categorias = () => {
       setCategoriasFiltradas(fetchedCategorias);
     } catch (error) {
       if (isOffline) {
-        console.warn("Sin conexión. No se pueden cargar datos nuevos.");
+        console.warn(t("categorias.offlineAviso"));
       } else {
         console.error("Error al obtener las categorías:", error);
       }
@@ -109,7 +113,7 @@ const Categorias = () => {
 
   const handleAddCategoria = async () => {
     if (!nuevaCategoria.nombre || !nuevaCategoria.descripcion) {
-      alert("Por favor, completa todos los campos antes de guardar.");
+      alert(t("categorias.errorCampos"));
       return;
     }
 
@@ -122,7 +126,7 @@ const Categorias = () => {
         ...prev,
         added: [...prev.added, categoriaConId],
       }));
-      alert("Estás offline. El cambio se guardará cuando te conectes.");
+      alert(t("categorias.offlineAviso"));
     }
 
     try {
@@ -134,18 +138,18 @@ const Categorias = () => {
         await addDoc(categoriasCollection, nuevaCategoria);
       }
 
-      console.log("Categoría agregada.");
+      console.log(t("categorias.agregado"));
     } catch (error) {
-      console.error("Error al agregar la categoría:", error);
+      console.error(t("categorias.errorAgregar"), error);
       setCategorias((prev) => prev.filter((cat) => cat.id !== tempId));
       setCategoriasFiltradas((prev) => prev.filter((cat) => cat.id !== tempId));
-      alert("Error al agregar la categoría: " + error.message);
+      alert(t("categorias.errorAgregar") + " " + error.message);
     }
   };
 
   const handleEditCategoria = async () => {
     if (!categoriaEditada.nombre || !categoriaEditada.descripcion) {
-      alert("Por favor, completa todos los campos antes de actualizar.");
+      alert(t("categorias.errorActualizar"));
       return;
     }
 
@@ -157,7 +161,7 @@ const Categorias = () => {
           { id: categoriaEditada.id, data: categoriaEditada },
         ],
       }));
-      alert("Estás offline. El cambio se guardará cuando te conectes.");
+      alert(t("categorias.offlineAviso"));
     }
 
     try {
@@ -180,11 +184,11 @@ const Categorias = () => {
         )
       );
 
-      alert("Categoría actualizada.");
+      alert(t("categorias.actualizado"));
       setShowEditModal(false);
     } catch (error) {
-      console.error("Error al actualizar la categoría:", error);
-      alert("Error al actualizar la categoría: " + error.message);
+      console.error(t("categorias.errorActualizar2"), error);
+      alert(t("categorias.errorActualizar2") + " " + error.message);
     }
   };
 
@@ -199,7 +203,7 @@ const Categorias = () => {
           ...prev,
           deleted: [...prev.deleted, categoriaAEliminar],
         }));
-        alert("Estás offline. El cambio se guardará cuando te conectes.");
+        alert(t("categorias.offlineAviso"));
       }
 
       setCategorias((prev) =>
@@ -214,10 +218,10 @@ const Categorias = () => {
         await deleteDoc(categoriaRef);
       }
 
-      console.log("Categoría eliminada.");
+      console.log(t("categorias.eliminado"));
     } catch (error) {
-      console.error("Error al eliminar la categoría:", error);
-      alert("Error al eliminar la categoría: " + error.message);
+      console.error(t("categorias.errorEliminar"), error);
+      alert(t("categorias.errorEliminar") + " " + error.message);
     }
   };
 
@@ -235,14 +239,14 @@ const Categorias = () => {
     <Container className="mt-5">
       {isOffline && (
         <div className="alert alert-warning text-center" role="alert">
-          ⚠ Estás sin conexión. Los cambios se guardarán localmente y se sincronizarán automáticamente al volver a estar en línea.
+          {t("categorias.offline")}
         </div>
       )}
 
-      <h4>Gestión de Categorías</h4>
+      <h4>{t("categorias.titulo")}</h4>
       <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <Button onClick={() => setShowModal(true)}>
-          Agregar categoría
+          {t("categorias.agregar")}
         </Button>
         <Col lg={3} md={4} sm={4} xs={12}>
           <Button
@@ -251,7 +255,7 @@ const Categorias = () => {
             style={{ width: "100%" }}
             onClick={() => setShowChatModal(true)}
           >
-            Chat IA
+            {t("categorias.chat")}
           </Button>
         </Col>
         <CuadroBusqueda
